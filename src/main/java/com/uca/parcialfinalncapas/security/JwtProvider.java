@@ -1,6 +1,5 @@
 package com.uca.parcialfinalncapas.security;
 
-
 import com.uca.parcialfinalncapas.entities.User;
 import com.uca.parcialfinalncapas.exceptions.UserNotFoundException;
 import com.uca.parcialfinalncapas.repository.UserRepository;
@@ -77,16 +76,16 @@ public class JwtProvider {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
-                    .get("username").toString();
+                    .get("correo").toString();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public UUID getIdFromToken(String token) {
+    public Long getIdFromToken(String token) {
         try {
-            return UUID.fromString(Jwts.parser()
+            return Long.parseLong(Jwts.parser()
                     .verifyWith((SecretKey) getKey())
                     .build()
                     .parseSignedClaims(token)
