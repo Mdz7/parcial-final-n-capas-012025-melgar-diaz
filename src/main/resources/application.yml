@@ -10,5 +10,5 @@ spring:
 
 
 app:
-  jwt-secret: 915c72ae5d1ee9247ff653211d6397f6a8ae1bf9dd441f13ea5a5b83c86da75c
+  jwt-secret: 4f8b7a12e3c95d6f9a2b0c7d8e1f3456789abcdeffedcba9876543210fedcba98
   jwt-expiration-time: 86400000

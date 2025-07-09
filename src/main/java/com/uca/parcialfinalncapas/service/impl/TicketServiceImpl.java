@@ -7,11 +7,17 @@ import com.uca.parcialfinalncapas.dto.response.TicketResponseList;
 import com.uca.parcialfinalncapas.entities.Ticket;
 import com.uca.parcialfinalncapas.entities.User;
 import com.uca.parcialfinalncapas.exceptions.BadTicketRequestException;
+
 import com.uca.parcialfinalncapas.exceptions.TicketNotFoundException;
+import com.uca.parcialfinalncapas.exceptions.UnauthorizedException;
 import com.uca.parcialfinalncapas.exceptions.UserNotFoundException;
 import com.uca.parcialfinalncapas.repository.TicketRepository;
 import com.uca.parcialfinalncapas.repository.UserRepository;
 import com.uca.parcialfinalncapas.service.TicketService;
+
+import com.uca.parcialfinalncapas.utils.Methods;
+
+import com.uca.parcialfinalncapas.utils.UserInfo;
 import com.uca.parcialfinalncapas.utils.enums.Rol;
 import com.uca.parcialfinalncapas.utils.mappers.TicketMapper;
 import jakarta.transaction.Transactional;
@@ -30,6 +36,8 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
+    private final Methods Methods;
+
 
     @Override
     @Transactional
@@ -40,7 +48,7 @@ public class TicketServiceImpl implements TicketService {
         var usuarioSoporte = userRepository.findByCorreo(ticket.getCorreoSoporte())
                 .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado con correo: " + ticket.getCorreoSoporte()));
 
-        if (!usuarioSoporte.getNombreRol().equals(Rol.TECH.getValue())) {
+        if (!usuarioSoporte.getNombreRol().equals("ROLE_TECH")) {
             throw new BadTicketRequestException("El usuario asignado no es un técnico de soporte");
         }
 
@@ -61,7 +69,7 @@ public class TicketServiceImpl implements TicketService {
         var usuarioSoporte = userRepository.findByCorreo(ticket.getCorreoSoporte())
                 .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado con correo: " + ticket.getCorreoSoporte()));
 
-        if (!usuarioSoporte.getNombreRol().equals(Rol.TECH.getValue())) {
+        if (!usuarioSoporte.getNombreRol().equals("ROLE_TECH")) {
             throw new BadTicketRequestException("El usuario asignado no es un técnico de soporte");
         }
 
@@ -80,16 +88,29 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public TicketResponse getTicketById(Long id) {
-    var ticketExistente = ticketRepository.findById(id)
-            .orElseThrow(() -> new TicketNotFoundException("Ticket no encontrado con ID: " + id));
+        Ticket ticket = ticketRepository.findById(id).orElse(null);
+        UserInfo userInfo = Methods.getUserInfo(ticket.getUsuarioId());
 
-    var usuarioSolicitante = userRepository.findById(ticketExistente.getUsuarioId())
-            .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        System.out.println("TICKET: " + ticket);
 
-    var usuarioSoporte = userRepository.findById(ticketExistente.getTecnicoAsignadoId())
-            .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado"));
+        if(ticket == null) throw new TicketNotFoundException("Ticket no encontrado");
 
-        return TicketMapper.toDTO(ticketExistente, usuarioSolicitante.getCorreo(), usuarioSoporte.getCorreo());
+        TicketResponse ticketResponse = null;
+
+        if(userInfo.roles().contains("ROLE_TECH") || ticket.getUsuarioId().equals(userInfo.currentUser().getId())) {
+            var ticketExistente = ticketRepository.findById(id)
+                    .orElseThrow(() -> new TicketNotFoundException("Ticket no encontrado con ID: " + id));
+
+            var usuarioSolicitante = userRepository.findById(ticketExistente.getUsuarioId())
+                    .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+
+            var usuarioSoporte = userRepository.findById(ticketExistente.getTecnicoAsignadoId())
+                    .orElseThrow(() -> new UserNotFoundException("Usuario asignado no encontrado"));
+
+            ticketResponse = TicketMapper.toDTO(ticketExistente, usuarioSolicitante.getCorreo(), usuarioSoporte.getCorreo());
+        } else throw new UnauthorizedException("No tiene permisos necesarios");
+
+        return ticketResponse;
     }
 
     @Override
