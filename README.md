@@ -4,8 +4,8 @@ Este repositorio contiene un proyecto para evaluar y practicar los conceptos de 
 
 ### Estudiantes
 - **Nombre del estudiante 1**: Mario Andres Diaz Salazar - 00020322
-- **Nombre del estudiante 2**: [Tu nombre aquí] - [Carnet aquí]
-- Sección: [Tu sección aquí]
+- **Nombre del estudiante 2**: Alejandro Melgar - 00026222
+- Sección: 2
 ---
 
 ## Sistema de Soporte Técnico
