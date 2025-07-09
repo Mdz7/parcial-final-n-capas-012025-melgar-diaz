@@ -1,14 +1,22 @@
 package com.uca.parcialfinalncapas.service.impl;
 
+import com.uca.parcialfinalncapas.dto.request.LogInRequest;
 import com.uca.parcialfinalncapas.dto.request.UserCreateRequest;
 import com.uca.parcialfinalncapas.dto.request.UserUpdateRequest;
 import com.uca.parcialfinalncapas.dto.response.UserResponse;
 import com.uca.parcialfinalncapas.entities.User;
 import com.uca.parcialfinalncapas.exceptions.UserNotFoundException;
 import com.uca.parcialfinalncapas.repository.UserRepository;
+import com.uca.parcialfinalncapas.security.JwtProvider;
 import com.uca.parcialfinalncapas.service.UserService;
 import com.uca.parcialfinalncapas.utils.mappers.UserMapper;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +25,13 @@ import java.util.List;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final ModelMapper modelMapper;
+    private final UsefullMethods usefullMethods;
 
     @Override
     public UserResponse findByCorreo(String correo) {
@@ -55,4 +70,31 @@ public class UserServiceImpl implements UserService {
     public List<UserResponse> findAll() {
         return UserMapper.toDTOList(userRepository.findAll());
     }
+
+
+    @Override
+    public String login(LogInRequest loginRequestDTO) {
+        // Authenticates the user using the provided username and password
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequestDTO.getUsername(),
+                        loginRequestDTO.getPassword()
+                )
+        );
+
+        // Sets the authentication in Spring Security's context
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtProvider.generateToken(authentication);
+
+        // Generates a JWT token for the authenticated user
+
+        User user = userRepository.findByUsernameOrEmail(loginRequestDTO.getUsername(), null).orElse(null);
+
+        if(user.getActive().equals(true)) {
+            return token;
+        }else throw new DeactivatedException("User is not activated");
+
+    }
+
 }

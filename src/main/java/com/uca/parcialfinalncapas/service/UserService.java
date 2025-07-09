@@ -45,4 +45,5 @@ public interface UserService {
     List<UserResponse> findAll();
 
 
+    String login(LogInRequest loginRequestDTO);
 }
