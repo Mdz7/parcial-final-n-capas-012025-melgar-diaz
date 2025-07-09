@@ -2,8 +2,13 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/supportdb
     username: postgres
-    password: root
+    password: 12345
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+
+app:
+    jwt-secret: ZXJlc3VuYWxhdGVuY2xhdmVjb2RpZmljYWRvZW5iYXNlNjQ=
+    jwt-expiration-time: 86400000
