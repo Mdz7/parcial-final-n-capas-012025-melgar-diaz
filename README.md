@@ -2,6 +2,11 @@
 
 Este repositorio contiene un proyecto para evaluar y practicar los conceptos de seguridad en aplicaciones Spring Boot usando JWT, roles y Docker.
 
+### Documentacion
+- Hay una carpeta llamada postman con captura del endpoint de login 
+- Nombre de la base de datos: parcialfinal
+- Comando para correr: docker compose up --build
+
 ### Estudiantes
 - **Nombre del estudiante 1**: Mario Andres Diaz Salazar - 00020322
 - **Nombre del estudiante 2**: Alejandro Melgar - 00026222
